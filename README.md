@@ -92,6 +92,17 @@ docker push ghcr.io/YOUR_GITHUB_USER/alara-comfy-worker:seoyeon-zimage-v1
 
 ## RunPod Serverless
 
+Built test image:
+
+```text
+ghcr.io/guitarfreak26/alara-comfy-worker:seoyeon-zimage-v1
+sha256:321a16fa40c98affdb0b446b8e71a7354e1839b79528549cc417be8175fe364f
+```
+
+The GitHub repo/package is private by default. RunPod needs GHCR credentials with
+`read:packages`, or the container package must be made public before the endpoint
+can pull this image anonymously.
+
 Create a Serverless endpoint:
 
 - Docker image: the pushed image
