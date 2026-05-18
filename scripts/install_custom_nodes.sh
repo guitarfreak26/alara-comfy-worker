@@ -41,7 +41,7 @@ clone_or_update "crt-nodes" "https://github.com/PGCRT/CRT-Nodes.git"
 for req in "${CUSTOM_NODES_DIR}"/*/requirements.txt; do
   [ -f "${req}" ] || continue
   echo "[custom-nodes] installing requirements from ${req}"
-  python -m pip install --break-system-packages --no-cache-dir -r "${req}"
+  python -m pip install --no-cache-dir -r "${req}"
 done
 
 echo "[custom-nodes] complete"

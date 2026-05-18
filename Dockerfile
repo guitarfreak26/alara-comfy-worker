@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.8.1-cudnn-runtime-ubuntu24.04
+FROM pytorch/pytorch:2.11.0-cuda12.8-cudnn9-runtime
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
@@ -10,9 +10,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
     COMFY_PORT=8188
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    python3-pip \
-    python3-venv \
     git \
     curl \
     ca-certificates \
@@ -29,9 +26,7 @@ COPY requirements.txt /app/requirements.txt
 RUN python3 -m pip install --break-system-packages --no-cache-dir -r /app/requirements.txt
 
 WORKDIR ${COMFY_DIR}
-RUN python3 -m pip install --break-system-packages --no-cache-dir \
-    torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 \
-    && python3 -m pip install --break-system-packages --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir -r requirements.txt
 
 COPY scripts/install_custom_nodes.sh /app/scripts/install_custom_nodes.sh
 RUN chmod +x /app/scripts/install_custom_nodes.sh && /app/scripts/install_custom_nodes.sh
@@ -40,4 +35,4 @@ COPY . /app
 RUN chmod +x /app/scripts/*.sh /app/scripts/*.py
 
 WORKDIR /app
-CMD ["python3", "-u", "handler.py"]
+CMD ["python", "-u", "handler.py"]
