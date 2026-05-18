@@ -38,10 +38,29 @@ clone_or_update "rgthree-comfy" "https://github.com/rgthree/rgthree-comfy.git"
 clone_or_update "comfyui-machinepainting-nodes" "https://github.com/machinepainting/ComfyUI-MachinePaintingNodes.git"
 clone_or_update "crt-nodes" "https://github.com/PGCRT/CRT-Nodes.git"
 
-for req in "${CUSTOM_NODES_DIR}"/*/requirements.txt; do
-  [ -f "${req}" ] || continue
+install_requirements() {
+  local req="$1"
+  local node_dir
+  local filtered_req
+
+  node_dir="$(basename "$(dirname "${req}")")"
+
+  if [ "${node_dir}" = "comfyui-impact-pack" ]; then
+    filtered_req="$(mktemp)"
+    grep -v -E 'facebookresearch/sam2|(^|[<>=[:space:]])sam2([<>=[:space:]]|$)' "${req}" > "${filtered_req}"
+    echo "[custom-nodes] installing filtered requirements from ${req} (skipping optional SAM2)"
+    python -m pip install --no-cache-dir -r "${filtered_req}"
+    rm -f "${filtered_req}"
+    return 0
+  fi
+
   echo "[custom-nodes] installing requirements from ${req}"
   python -m pip install --no-cache-dir -r "${req}"
+}
+
+for req in "${CUSTOM_NODES_DIR}"/*/requirements.txt; do
+  [ -f "${req}" ] || continue
+  install_requirements "${req}"
 done
 
 echo "[custom-nodes] complete"
