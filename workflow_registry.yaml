@@ -1,0 +1,56 @@
+workflows:
+  seoyeon-zimage-full-quality-v1:
+    type: image
+    family: zimage
+    file: workflows/seoyeon-zimage-full-quality-v1-api.json
+    description: "Canonical full-quality Seoyeon Z-Image Turbo workflow with detailer/upscale/LUT path."
+    default_width: 1088
+    default_height: 1920
+    aspect_ratios:
+      portrait:
+        width: 1088
+        height: 1920
+      tall:
+        width: 1088
+        height: 1920
+      story:
+        width: 1080
+        height: 1920
+      square:
+        width: 1536
+        height: 1536
+      landscape:
+        width: 1920
+        height: 1280
+    patch_points:
+      prompt: "54.inputs.text"
+      negative_prompt: "7.inputs.text"
+      seed: "61.inputs.seed"
+      width: "113.inputs.width"
+      height: "113.inputs.height"
+      count: "113.inputs.batch_size"
+      filename_prefix: "37.inputs.filename_prefix"
+    output_nodes:
+      - "37"
+    models:
+      diffusion_models:
+        - zImageTurbo_turbo.safetensors
+      text_encoders:
+        - qwen_3_4b.safetensors
+      vae:
+        - zimagevae.safetensors
+      loras:
+        - SeoZ2500.safetensors
+        - RealLORA.safetensors
+        - Mystic-XXX-ZIT-V7.safetensors
+      checkpoints:
+        - lustifySDXLNSFW_apexV8.safetensors
+      ultralytics/bbox:
+        - female-breast-v4.7.pt
+        - vagina-v4.2.pt
+        - face_yolov9c.pt
+      upscale_models:
+        - 2x_PureVision.pth
+        - 1x-ITF-SkinDiffDetail-Lite-v1.pth
+    required_luts:
+      - AppleLog2_to_Rec709_33_Grid.cube
