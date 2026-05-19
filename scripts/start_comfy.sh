@@ -16,6 +16,22 @@ if [ ! -d "${MODEL_ROOT}" ]; then
 fi
 mkdir -p models input/luts output
 
+python - <<'PY'
+from pathlib import Path
+
+path = Path("comfy_extras/nodes_upscale_model.py")
+text = path.read_text()
+old = "comfy.utils.load_torch_file(model_path, safe_load=True)"
+new = "comfy.utils.load_torch_file(model_path, safe_load=False)"
+if old in text:
+    path.write_text(text.replace(old, new))
+    print("[start] patched UpscaleModelLoader to allow trusted legacy .pth files", flush=True)
+elif new in text:
+    print("[start] UpscaleModelLoader legacy .pth patch already applied", flush=True)
+else:
+    print("[start] warning: UpscaleModelLoader patch target not found", flush=True)
+PY
+
 link_model_dir() {
   local name="$1"
   local src="${MODEL_ROOT}/${name}"
