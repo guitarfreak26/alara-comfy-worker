@@ -19,7 +19,7 @@ import yaml
 
 APP_DIR = Path(__file__).resolve().parent
 COMFY_DIR = Path(os.getenv("COMFY_DIR", "/opt/ComfyUI"))
-MODEL_ROOT = Path(os.getenv("MODEL_ROOT", "/runpod-volume/comfy-models"))
+CONFIGURED_MODEL_ROOT = Path(os.getenv("MODEL_ROOT", "/runpod-volume/comfy-models"))
 COMFY_HOST = os.getenv("COMFY_HOST", "127.0.0.1")
 COMFY_PORT = int(os.getenv("COMFY_PORT", "8188"))
 COMFY_URL = os.getenv("COMFY_URL", f"http://{COMFY_HOST}:{COMFY_PORT}")
@@ -32,6 +32,7 @@ MAX_COUNT = int(os.getenv("MAX_COUNT", "4"))
 _comfy_process: subprocess.Popen[str] | None = None
 _comfy_lock = threading.Lock()
 _registry_cache: dict[str, Any] | None = None
+_model_root_cache: Path | None = None
 
 
 class WorkerError(RuntimeError):
@@ -50,6 +51,57 @@ def _get_workflow_config(workflow_id: str) -> dict[str, Any]:
     if workflow_id not in workflows:
         raise WorkerError(f"Unknown workflow_id: {workflow_id}")
     return workflows[workflow_id]
+
+
+def _model_candidates() -> list[Path]:
+    candidates = [
+        CONFIGURED_MODEL_ROOT,
+        Path("/runpod-volume/comfy-models"),
+        Path("/runpod-volume/runpod-slim/ComfyUI/models"),
+        Path("/runpod-volume/workspace/runpod-slim/ComfyUI/models"),
+        Path("/runpod-volume/ComfyUI/models"),
+        Path("/runpod-volume/models"),
+        Path("/workspace/runpod-slim/ComfyUI/models"),
+    ]
+    unique: list[Path] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        key = str(candidate)
+        if key not in seen:
+            unique.append(candidate)
+            seen.add(key)
+    return unique
+
+
+def _missing_models(model_root: Path, workflow_config: dict[str, Any]) -> list[str]:
+    missing: list[str] = []
+    for folder, filenames in (workflow_config.get("models") or {}).items():
+        for filename in filenames or []:
+            candidate = model_root / folder / filename
+            if not candidate.exists():
+                missing.append(str(candidate))
+    return missing
+
+
+def _resolve_model_root(workflow_config: dict[str, Any]) -> Path:
+    global _model_root_cache
+    if _model_root_cache is not None:
+        return _model_root_cache
+
+    print(f"[handler] configured MODEL_ROOT={CONFIGURED_MODEL_ROOT}", flush=True)
+    for candidate in _model_candidates():
+        missing = _missing_models(candidate, workflow_config)
+        if not missing:
+            _model_root_cache = candidate
+            print(f"[handler] using MODEL_ROOT={candidate}", flush=True)
+            return candidate
+        print(
+            f"[handler] model root candidate {candidate} missing {len(missing)} required files",
+            flush=True,
+        )
+
+    _model_root_cache = CONFIGURED_MODEL_ROOT
+    return _model_root_cache
 
 
 def _set_path(obj: dict[str, Any], dotted_path: str, value: Any) -> None:
@@ -82,18 +134,19 @@ def _wait_for_comfy(timeout: int = COMFY_START_TIMEOUT) -> None:
     raise WorkerError(f"ComfyUI did not become ready within {timeout}s: {last_error}")
 
 
-def _ensure_comfy_running() -> None:
+def _ensure_comfy_running(workflow_config: dict[str, Any]) -> None:
     global _comfy_process
     with _comfy_lock:
         if _comfy_process and _comfy_process.poll() is None:
             return
 
         start_script = APP_DIR / "scripts" / "start_comfy.sh"
+        model_root = _resolve_model_root(workflow_config)
         env = os.environ.copy()
         env.update(
             {
                 "COMFY_DIR": str(COMFY_DIR),
-                "MODEL_ROOT": str(MODEL_ROOT),
+                "MODEL_ROOT": str(model_root),
                 "COMFY_HOST": COMFY_HOST,
                 "COMFY_PORT": str(COMFY_PORT),
             }
@@ -110,12 +163,8 @@ def _ensure_comfy_running() -> None:
 
 
 def _validate_models(workflow_id: str, workflow_config: dict[str, Any]) -> None:
-    missing: list[str] = []
-    for folder, filenames in (workflow_config.get("models") or {}).items():
-        for filename in filenames or []:
-            candidate = MODEL_ROOT / folder / filename
-            if not candidate.exists():
-                missing.append(str(candidate))
+    model_root = _resolve_model_root(workflow_config)
+    missing = _missing_models(model_root, workflow_config)
 
     if missing:
         joined = "\n".join(f"  - {item}" for item in missing)
@@ -248,7 +297,7 @@ def handler(job: dict[str, Any]) -> dict[str, Any]:
     try:
         workflow_config = _get_workflow_config(workflow_id)
         _validate_models(workflow_id, workflow_config)
-        _ensure_comfy_running()
+        _ensure_comfy_running(workflow_config)
 
         workflow = _load_workflow(workflow_config)
         patched_workflow, seed = _patch_workflow(workflow, workflow_config, job_input, job_id)

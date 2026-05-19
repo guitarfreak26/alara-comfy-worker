@@ -9,6 +9,11 @@ COMFY_PORT="${COMFY_PORT:-8188}"
 cd "${COMFY_DIR}"
 
 echo "[start] model root: ${MODEL_ROOT}"
+if [ ! -d "${MODEL_ROOT}" ]; then
+  echo "[start] warning: model root does not exist: ${MODEL_ROOT}"
+  echo "[start] /runpod-volume contents:"
+  find /runpod-volume -maxdepth 3 -type d 2>/dev/null | sort | head -200 || true
+fi
 mkdir -p models input/luts output
 
 link_model_dir() {
