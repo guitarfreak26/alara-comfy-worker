@@ -54,6 +54,7 @@ jobs:
             ${{ steps.image.outputs.name }}:seoyeon-zimage-v1
             ${{ steps.image.outputs.name }}:seoyeon-zimage-v1-autopath
             ${{ steps.image.outputs.name }}:seoyeon-zimage-v1-safe-workflow
+            ${{ steps.image.outputs.name }}:seoyeon-zimage-v1-trusted-upscalers
             ${{ steps.image.outputs.name }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

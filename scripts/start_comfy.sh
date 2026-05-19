@@ -39,6 +39,15 @@ link_model_dir "upscale_models"
 link_model_dir "ultralytics"
 link_model_dir "vae"
 
+WHITELIST_DIR="${COMFY_DIR}/user/default/ComfyUI-Impact-Subpack"
+WHITELIST_FILE="${WHITELIST_DIR}/model-whitelist.txt"
+mkdir -p "${WHITELIST_DIR}"
+cat > "${WHITELIST_FILE}" <<'EOF'
+1x-ITF-SkinDiffDetail-Lite-v1.pth
+2x_PureVision.pth
+EOF
+echo "[start] wrote Impact Subpack trusted model whitelist"
+
 if [ -f "${COMFY_DIR}/custom_nodes/ComfyUI-CameraForensicRealism/luts/AppleLog2_to_Rec709_33_Grid.cube" ]; then
   cp "${COMFY_DIR}/custom_nodes/ComfyUI-CameraForensicRealism/luts/AppleLog2_to_Rec709_33_Grid.cube" \
      "${COMFY_DIR}/input/luts/AppleLog2_to_Rec709_33_Grid.cube"
