@@ -612,10 +612,6 @@
       "image": [
         "46",
         0
-      ],
-      "lut_data": [
-        "45",
-        0
       ]
     },
     "class_type": "LUTApply",

@@ -220,6 +220,18 @@ def _patch_workflow(workflow: dict[str, Any], workflow_config: dict[str, Any], p
     return patched, seed
 
 
+def _apply_compatibility_patches(workflow: dict[str, Any]) -> None:
+    for node_id, node in workflow.items():
+        if not isinstance(node, dict):
+            continue
+        inputs = node.get("inputs")
+        if not isinstance(inputs, dict):
+            continue
+        if node.get("class_type") == "LUTApply" and "lut_data" in inputs:
+            del inputs["lut_data"]
+            print(f"[handler] removed unsupported lut_data input from LUTApply node {node_id}", flush=True)
+
+
 def _queue_prompt(workflow: dict[str, Any], client_id: str) -> str:
     res = requests.post(f"{COMFY_URL}/prompt", json={"prompt": workflow, "client_id": client_id}, timeout=30)
     if not res.ok:
@@ -301,6 +313,7 @@ def handler(job: dict[str, Any]) -> dict[str, Any]:
 
         workflow = _load_workflow(workflow_config)
         patched_workflow, seed = _patch_workflow(workflow, workflow_config, job_input, job_id)
+        _apply_compatibility_patches(patched_workflow)
         prompt_id = _queue_prompt(patched_workflow, client_id=job_id)
         history_item = _poll_history(prompt_id)
         outputs = _collect_outputs(history_item, workflow_config, include_base64)
