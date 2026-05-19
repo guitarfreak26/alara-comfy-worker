@@ -294,7 +294,7 @@
       "eta": 0.5,
       "sampler_mode": "standard",
       "sampler_name": "euler",
-      "scheduler": "beta57",
+      "scheduler": "beta",
       "steps": 20,
       "cfg": 1,
       "denoise": 0.31,
@@ -607,7 +607,7 @@
   },
   "40": {
     "inputs": {
-      "lut_file": 0.04,
+      "lut_file": "AppleLog2_to_Rec709_33_Grid.cube",
       "intensity": 1,
       "image": [
         "46",
