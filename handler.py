@@ -217,6 +217,9 @@ def _patch_workflow(workflow: dict[str, Any], workflow_config: dict[str, Any], p
         prefix = str(payload.get("filename_prefix") or f"ALARA/{workflow_config.get('family', 'workflow')}/{job_id}")
         _set_path(patched, patch_points["filename_prefix"], prefix)
 
+    if "lut_intensity" in patch_points and "lut_intensity" in payload:
+        _set_path(patched, patch_points["lut_intensity"], float(payload["lut_intensity"]))
+
     return patched, seed
 
 

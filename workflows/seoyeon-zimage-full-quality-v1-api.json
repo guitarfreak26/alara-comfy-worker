@@ -608,7 +608,7 @@
   "40": {
     "inputs": {
       "lut_file": "AppleLog2_to_Rec709_33_Grid.cube",
-      "intensity": 1,
+      "intensity": 0,
       "image": [
         "46",
         0

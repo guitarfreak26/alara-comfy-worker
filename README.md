@@ -8,7 +8,7 @@ First registered workflow:
 seoyeon-zimage-full-quality-v1
 ```
 
-This is the canonical full-quality Seoyeon Z-Image workflow Alan tested on a normal RunPod ComfyUI pod. It includes the full detailer/upscale/camera/LUT path.
+This is the canonical full-quality Seoyeon Z-Image workflow Alan tested on a normal RunPod ComfyUI pod. It includes the full detailer/upscale/camera path. The final LUT node is kept in the graph but defaults to intensity `0` for serverless, because the full Apple LUT produced a blue colour cast in the first Hermes run.
 
 ## Layout
 

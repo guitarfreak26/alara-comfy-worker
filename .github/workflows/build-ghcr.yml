@@ -58,6 +58,7 @@ jobs:
             ${{ steps.image.outputs.name }}:seoyeon-zimage-v1-legacy-upscale
             ${{ steps.image.outputs.name }}:seoyeon-zimage-v1-legacy-pth
             ${{ steps.image.outputs.name }}:seoyeon-zimage-v1-lutfix
+            ${{ steps.image.outputs.name }}:seoyeon-zimage-v1-natural-color
             ${{ steps.image.outputs.name }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

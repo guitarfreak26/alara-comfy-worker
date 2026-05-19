@@ -3,7 +3,7 @@ workflows:
     type: image
     family: zimage
     file: workflows/seoyeon-zimage-full-quality-v1-api.json
-    description: "Canonical full-quality Seoyeon Z-Image Turbo workflow with detailer/upscale/LUT path."
+    description: "Canonical full-quality Seoyeon Z-Image Turbo workflow with detailer/upscale path and LUT disabled by default for natural colour."
     default_width: 1088
     default_height: 1920
     aspect_ratios:
@@ -30,6 +30,7 @@ workflows:
       height: "113.inputs.height"
       count: "113.inputs.batch_size"
       filename_prefix: "37.inputs.filename_prefix"
+      lut_intensity: "40.inputs.intensity"
     output_nodes:
       - "37"
     models:
