@@ -30,6 +30,18 @@ elif new in text:
     print("[start] UpscaleModelLoader legacy .pth patch already applied", flush=True)
 else:
     print("[start] warning: UpscaleModelLoader patch target not found", flush=True)
+
+utils_path = Path("comfy/utils.py")
+utils_text = utils_path.read_text()
+utils_old = "torch.load(ckpt, map_location=device, weights_only=True, **torch_args)"
+utils_new = "torch.load(ckpt, map_location=device, weights_only=False, **torch_args)"
+if utils_old in utils_text:
+    utils_path.write_text(utils_text.replace(utils_old, utils_new))
+    print("[start] patched comfy.utils.load_torch_file for trusted legacy .pth files", flush=True)
+elif utils_new in utils_text:
+    print("[start] comfy.utils legacy .pth patch already applied", flush=True)
+else:
+    print("[start] warning: comfy.utils legacy .pth patch target not found", flush=True)
 PY
 
 link_model_dir() {
