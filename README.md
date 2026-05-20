@@ -7,11 +7,14 @@ First registered workflow:
 ```text
 seoyeon-zimage-full-quality-v1
 seoyeon-zimage-clean-base-v1
+seoyeon-zimage-good-selfie-v1
 ```
 
 This is the canonical full-quality Seoyeon Z-Image workflow Alan tested on a normal RunPod ComfyUI pod. It includes the full detailer/upscale/camera path. The final LUT node is kept in the graph but defaults to intensity `0` for serverless, because the full Apple LUT produced a blue colour cast in the first Hermes run.
 
 `seoyeon-zimage-clean-base-v1` is a diagnostic/clean lane that saves directly after the base Z-Image VAE decode. It bypasses the SDXL adult detailers, face detailer, denoiser, camera forensic node, LUT, and final upscalers so we can separate LoRA/prompt quality from postprocess overcooking.
+
+`seoyeon-zimage-good-selfie-v1` is Alan's NEWTEST export after fixing the gritty selfie issue on the pod. It keeps the detailer path but uses the smoother LoRA/denoiser settings from that known-good lane.
 
 ## Layout
 
